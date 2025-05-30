@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useConnectWallet, useWallets, useCurrentAccount } from '@mysten/dapp-kit';
+import Link from "next/link"
 
 export default function ConnectWallet() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -39,7 +40,7 @@ export default function ConnectWallet() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+    <main className="flex min-h-screen flex-col items-center justify-center grid-background px-4">
       <div className="max-w-lg w-full text-center space-y-8">
         {/* Animated Walrus Character */}
         <div className="flex justify-center mb-8">
@@ -72,7 +73,7 @@ export default function ConnectWallet() {
         <Button
           onClick={handleWalletConnect}
           disabled={isPending}
-          className="w-full py-6 text-lg rounded-full bg-black text-white hover:bg-gray-800"
+          className="max-w-sm mx-auto py-6 text-lg rounded-full bg-black text-white hover:bg-gray-800 discover-button-hover"
         >
           {isPending ? (
             <div className="flex items-center gap-2">
@@ -96,6 +97,13 @@ export default function ConnectWallet() {
               Privacy Policy
             </a>
           </p>
+        </div>
+
+        {/* Back to Landing Link */}
+        <div className="mt-8">
+          <Link href="/" className="text-gray-600 hover:text-black underline">
+            Return to Landing Page
+          </Link>
         </div>
       </div>
     </main>

@@ -94,7 +94,7 @@ export default function CreatePage() {
                 <ReactMarkdown>{content}</ReactMarkdown>
               </div>
             ) : (
-              <MarkdownEditor value={content} onChange={setContent} />
+            <MarkdownEditor value={content} onChange={setContent} />
             )}
           </div>
 

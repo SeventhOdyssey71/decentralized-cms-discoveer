@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { useWalrus } from "@/hooks/useWalrus"
+import { useRouter } from 'next/navigation'
 import {
   Bold,
   Italic,
@@ -21,6 +23,7 @@ import {
   Save,
   ArrowLeft,
 } from "lucide-react"
+import Header from '@/components/header'
 
 export default function WritePage() {
   const [title, setTitle] = useState("")
@@ -29,6 +32,15 @@ export default function WritePage() {
   const [isPreview, setIsPreview] = useState(false)
   const [wordCount, setWordCount] = useState(0)
   const [lastSaved, setLastSaved] = useState("Never")
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const { uploadArticle } = useWalrus()
+  const router = useRouter()
 
   const handleContentChange = (value: string) => {
     setContent(value)
@@ -148,84 +160,37 @@ export default function WritePage() {
     // Convert images (![alt](url))
     html = html.replace(/!\[(.*?)\]\\((.*?)\\)/g, '<img src="$2" alt="$1" />');
 
-    // Convert newlines to paragraphs
-    html = html.split('\n').map(paragraph => `<p>${paragraph}</p>`).join('');
+    // Convert newlines to paragraphs (handle multiple newlines)
+    html = html.split(/\n\n+/).map(paragraph => `<p>${paragraph}</p>`).join('\n');
 
     return html;
   };
 
-  const handlePublish = () => {
-    const formattedContent = convertMarkdownToHtml(content);
-
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title || "Untitled Article"}</title>
-    <style>
-        body { font-family: "Futura", sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f8f8f8; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        img { max-width: 100%; height: auto; display: block; margin: 20px auto; }
-        h1 { text-align: center; margin-bottom: 20px; }
-        .author-info { text-align: center; margin-bottom: 20px; font-size: 0.9em; color: #555; }
-        .content { margin-top: 20px; }
-        /* Basic prose styling */
-        .prose p { margin-bottom: 1em; }
-        .prose ul, .prose ol { margin-bottom: 1em; padding-left: 20px; }
-        .prose li { margin-bottom: 0.5em; }
-        .prose a { color: #007bff; text-decoration: none; }
-        .prose a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>${title || "Untitled Article"}</h1>
-        ${featuredImage ? `<img src="${featuredImage}" alt="Featured Image">` : ''}
-        <div class="author-info">
-            By Your Name {/* Placeholder */}
-        </div>
-        <div class="content prose">
-            ${formattedContent}
-        </div>
-    </div>
-</body>
-</html>
-    `;
-
-    // TODO: Implement actual publishing to Walrus with htmlContent
-    console.log("Generated HTML for publishing:", htmlContent);
-    alert("Article HTML generated. Check the console for the output. \n\nPublishing to Walrus is not yet implemented.");
-  };
+  const handlePublish = async () => {
+    if (!uploadArticle) {
+      console.error("Hooks not initialized yet.");
+      return;
+    }
+    setIsPublishing(true);
+    try {
+      const htmlContent = convertMarkdownToHtml(content)
+      const walrusBlobId = await uploadArticle(htmlContent)
+      console.log("Article published successfully! (Metadata not published to contract)")
+      // Redirect to dashboard or article page
+      router.push('/dashboard')
+    } catch (error) {
+      console.error("Error publishing article:", error)
+      alert("Failed to publish article. See console for details.")
+    } finally {
+      setIsPublishing(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 sticky top-0 bg-white z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Link href="/dashboard" className="flex items-center gap-2 text-gray-600 hover:text-black">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Dashboard</span>
-              </Link>
-            </div>
+      <Header />
 
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">Draft • Last saved {lastSaved}</span>
-              <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
-                <Eye className="h-4 w-4" />
-                {isPreview ? "Hide Preview" : "Preview"}
-              </Button>
-              <Button onClick={handlePublish} className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
-                Publish
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      {mounted && (
       <div className="flex max-w-7xl mx-auto">
         {/* Sidebar */}
         <div className="w-64 border-r border-gray-200 p-4">
@@ -265,27 +230,42 @@ export default function WritePage() {
                 <div className="flex-1"></div>
 
                 <span className="text-sm text-gray-500">{wordCount} words</span>
+                  {!isPreview && (
+                    <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
+                      <Eye className="h-4 w-4" />
+                      Preview
+                    </Button>
+                  )}
+                  {isPreview && (
+                    <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
+                      <Eye className="h-4 w-4" />
+                      Hide Preview
+                    </Button>
+                  )}
+                  <Button onClick={handlePublish} disabled={isPublishing} className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
+                    {isPublishing ? "Publishing..." : "Publish"}
+                  </Button>
               </div>
 
-              {/* Featured Image Input */}
-              <div className="mb-6 space-y-2">
-                <Label htmlFor="featured-image">Featured Image</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id="featured-image-url"
-                    placeholder="Enter image url (optional)"
-                    value={featuredImage}
-                    onChange={(e) => setFeaturedImage(e.target.value)}
-                    className="flex-1 text-base border-gray-300 rounded-lg placeholder:text-gray-400 focus-visible:ring-0"
-                  />
-                  <span className="text-gray-500">or</span>
-                  <Input
-                    id="featured-image-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="w-auto text-sm"
-                  />
+                {/* Featured Image Input */}
+                <div className="mb-6 space-y-2">
+                  <Label htmlFor="featured-image">Featured Image</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="featured-image-url"
+                      placeholder="Enter image url (optional)"
+                      value={featuredImage}
+                      onChange={(e) => setFeaturedImage(e.target.value)}
+                      className="flex-1 text-base border-gray-300 rounded-lg placeholder:text-gray-400 focus-visible:ring-0"
+                    />
+                    <span className="text-gray-500">or</span>
+                    <Input
+                      id="featured-image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="w-auto text-sm"
+                    />
                 </div>
               </div>
 
@@ -320,11 +300,12 @@ export default function WritePage() {
 
               <h1 className="text-4xl font-bold mb-6">{title || "Untitled Article"}</h1>
 
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }}></div>
+                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }}></div>
+              </div>
+            )}
+              </div>
             </div>
           )}
-        </div>
-      </div>
     </div>
   )
 }

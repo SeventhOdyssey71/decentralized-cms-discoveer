@@ -118,7 +118,7 @@ export default function ArticlePage() {
   };
 
   if (isLoading) {
-    return (
+  return (
       <div className="min-h-screen bg-white">
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-8">
@@ -133,7 +133,7 @@ export default function ArticlePage() {
             </div>
           </div>
         </main>
-      </div>
+        </div>
     );
   }
 
@@ -151,7 +151,7 @@ export default function ArticlePage() {
             </Link>
           </div>
         </main>
-      </div>
+              </div>
     );
   }
 
@@ -159,16 +159,16 @@ export default function ArticlePage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
+            <div className="mb-8">
           <Link href="/dashboard">
             <Button variant="outline" className="mb-6">
               ← Back to Dashboard
-            </Button>
+                      </Button>
           </Link>
           <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
           <p className="text-xl text-gray-600 mb-6">{article.subtitle}</p>
           <div className="flex items-center gap-4 text-sm text-gray-500 mb-8">
-            <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               <span>{article.date}</span>
             </div>
@@ -181,7 +181,7 @@ export default function ArticlePage() {
               <span>{article.claps} claps</span>
             </div>
           </div>
-        </div>
+                    </div>
 
         <div className="relative w-full h-[400px] mb-8">
           <img
@@ -189,17 +189,17 @@ export default function ArticlePage() {
             alt={article.title}
             className="w-full h-full object-cover rounded-lg"
           />
-        </div>
+                    </div>
 
         <div className="prose max-w-none mb-12">
           <div dangerouslySetInnerHTML={{ __html: article.content }} />
-        </div>
+                  </div>
 
         <div className="border-t border-gray-200 pt-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-              <div>
+                  <div>
                 <p className="font-medium">{article.author}</p>
                 <p className="text-sm text-gray-500">{article.publication}</p>
               </div>
@@ -222,8 +222,8 @@ export default function ArticlePage() {
           <Button variant="outline" disabled>
             Read Next Article →
           </Button>
-        </div>
-      </main>
+      </div>
+    </main>
     </div>
   );
 }
