@@ -11,14 +11,16 @@ import { MarkdownEditor } from "@/components/markdown-editor"
 import { useContract } from "@/hooks/useContract"
 import { useWalrus } from "@/hooks/useWalrus"
 import { toast } from "sonner"
+import ReactMarkdown from 'react-markdown';
 
 export default function CreatePage() {
   const router = useRouter()
   const { createArticle } = useContract()
-  const { storeArticle } = useWalrus()
+  const { uploadArticle } = useWalrus()
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isPreview, setIsPreview] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +28,7 @@ export default function CreatePage() {
 
     try {
       // First, store the article content in Walrus
-      const walrusBlobId = await storeArticle(content)
+      const walrusBlobId = await uploadArticle(content)
       
       // Then, create the article on-chain
       await createArticle(walrusBlobId)
@@ -87,20 +89,35 @@ export default function CreatePage() {
 
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <MarkdownEditor value={content} onChange={setContent} />
+            {isPreview ? (
+              <div className="prose max-w-none">
+                <ReactMarkdown>{content}</ReactMarkdown>
+              </div>
+            ) : (
+              <MarkdownEditor value={content} onChange={setContent} />
+            )}
           </div>
 
           <div className="flex justify-end gap-4">
             <Button 
               type="button" 
               variant="outline"
+              onClick={() => setIsPreview(!isPreview)}
+              className="rounded-full"
+            >
+              {isPreview ? 'Edit' : 'Preview'}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
               onClick={() => router.push("/dashboard")}
+              className="rounded-full"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
-              className="bg-black text-white"
+              className="rounded-full bg-black text-white"
               disabled={isPublishing}
             >
               {isPublishing ? "Publishing..." : "Publish Page"}

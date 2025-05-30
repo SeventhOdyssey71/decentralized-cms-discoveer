@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import {
   Bold,
   Italic,
@@ -106,6 +107,18 @@ export default function WritePage() {
     setLastSaved(now)
   }
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // For now, just set the featuredImage state to the file name
+      // In a real implementation, you would upload the file to Walrus
+      console.log("Selected file:", file.name);
+      // You might want to display a preview of the image here
+      // For now, we'll just use the URL input or a placeholder in the preview
+      // setFeaturedImage(URL.createObjectURL(file)); // Example: create a local URL for preview
+    }
+  };
+
   const convertMarkdownToHtml = (markdown: string) => {
     let html = markdown;
 
@@ -201,11 +214,11 @@ export default function WritePage() {
 
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">Draft • Last saved {lastSaved}</span>
-              <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
                 <Eye className="h-4 w-4" />
-                Preview
+                {isPreview ? "Hide Preview" : "Preview"}
               </Button>
-              <Button onClick={handlePublish} className="bg-blue-600 text-white hover:bg-blue-700">
+              <Button onClick={handlePublish} className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
                 Publish
               </Button>
             </div>
@@ -249,50 +262,31 @@ export default function WritePage() {
             <div className="p-8">
               {/* Toolbar */}
               <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200">
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('bold')}>
-                  <Bold className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('italic')}>
-                  <Italic className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('strikethrough')}>
-                  <Strikethrough className="h-4 w-4" />
-                </Button>
-
-                <div className="w-px h-6 bg-gray-300 mx-2"></div>
-
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('bullet')}>
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('ordered')}>
-                  <ListOrdered className="h-4 w-4" />
-                </Button>
-
-                <div className="w-px h-6 bg-gray-300 mx-2"></div>
-
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('link')}>
-                  <LinkIcon className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('image')}>
-                  <ImageIcon className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => applyFormatting('emoji')}>
-                  <Smile className="h-4 w-4" />
-                </Button>
-
                 <div className="flex-1"></div>
 
                 <span className="text-sm text-gray-500">{wordCount} words</span>
               </div>
 
-              {/* Featured Image URL Input */}
-              <div className="mb-6">
-                <Input
-                  placeholder="Enter image url"
-                  value={featuredImage}
-                  onChange={(e) => setFeaturedImage(e.target.value)}
-                  className="text-base border-gray-300 rounded-lg placeholder:text-gray-400 focus-visible:ring-0"
-                />
+              {/* Featured Image Input */}
+              <div className="mb-6 space-y-2">
+                <Label htmlFor="featured-image">Featured Image</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    id="featured-image-url"
+                    placeholder="Enter image url (optional)"
+                    value={featuredImage}
+                    onChange={(e) => setFeaturedImage(e.target.value)}
+                    className="flex-1 text-base border-gray-300 rounded-lg placeholder:text-gray-400 focus-visible:ring-0"
+                  />
+                  <span className="text-gray-500">or</span>
+                  <Input
+                    id="featured-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-auto text-sm"
+                  />
+                </div>
               </div>
 
               {/* Title Input */}
