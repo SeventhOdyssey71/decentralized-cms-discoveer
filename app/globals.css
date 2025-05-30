@@ -10,7 +10,7 @@
 }
 
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Futura", sans-serif;
   color: hsl(var(--foreground));
   background-color: hsl(var(--background));
 }

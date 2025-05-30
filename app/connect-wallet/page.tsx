@@ -3,13 +3,21 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { useConnectWallet, useWallets } from '@mysten/dapp-kit';
+import { useConnectWallet, useWallets, useCurrentAccount } from '@mysten/dapp-kit';
 
 export default function ConnectWallet() {
   const [isConnecting, setIsConnecting] = useState(false)
   const router = useRouter()
   const wallets = useWallets();
   const { mutate: connect, isPending, isSuccess } = useConnectWallet();
+  const account = useCurrentAccount();
+
+  // Redirect to dashboard if already connected
+  useEffect(() => {
+    if (account) {
+      router.push("/dashboard");
+    }
+  }, [account, router]);
 
   // Redirect to dashboard on successful connection
   useEffect(() => {

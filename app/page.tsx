@@ -1,8 +1,23 @@
+"use client";
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CircleIllustration } from "@/components/circle-illustration"
+import { useCurrentAccount } from '@mysten/dapp-kit';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const account = useCurrentAccount();
+  const router = useRouter();
+
+  const handleDiscoveerClick = () => {
+    if (account) {
+      router.push('/dashboard');
+    } else {
+      router.push('/connect-wallet');
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 bg-[#97F0E5] rounded-full mx-4 my-4 px-6 py-4 flex items-center justify-between">
@@ -42,12 +57,13 @@ export default function Home() {
           centralized components.
         </p>
 
-        <Link href="/connect-wallet">
-          <Button className="mt-8 rounded-full bg-black text-white px-8 py-6 flex items-center gap-2 hover:bg-black">
-            Discoveer now
-            <span className="ml-1">▶</span>
-          </Button>
-        </Link>
+        <Button
+          className="mt-8 rounded-full bg-black text-white px-8 py-6 flex items-center gap-2 hover:bg-black"
+          onClick={handleDiscoveerClick}
+        >
+          Discoveer now
+          <span className="ml-1">▶</span>
+        </Button>
       </div>
 
       <footer className="py-8 border-t border-gray-200">
