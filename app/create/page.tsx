@@ -1,22 +1,44 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MarkdownEditor } from "@/components/markdown-editor"
+import { useContract } from "@/hooks/useContract"
+import { useWalrus } from "@/hooks/useWalrus"
+import { toast } from "sonner"
 
 export default function CreatePage() {
+  const router = useRouter()
+  const { createArticle } = useContract()
+  const { storeArticle } = useWalrus()
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
+  const [isPublishing, setIsPublishing] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here we would integrate with Sui and Walrus
-    console.log("Creating page:", { title, content })
+    setIsPublishing(true)
+
+    try {
+      // First, store the article content in Walrus
+      const walrusBlobId = await storeArticle(content)
+      
+      // Then, create the article on-chain
+      await createArticle(walrusBlobId)
+      
+      toast.success("Article published successfully!")
+      router.push("/dashboard")
+    } catch (error) {
+      console.error("Error publishing article:", error)
+      toast.error("Failed to publish article. Please try again.")
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   return (
@@ -69,11 +91,19 @@ export default function CreatePage() {
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline">
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => router.push("/dashboard")}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="bg-black text-white">
-              Publish Page
+            <Button 
+              type="submit" 
+              className="bg-black text-white"
+              disabled={isPublishing}
+            >
+              {isPublishing ? "Publishing..." : "Publish Page"}
             </Button>
           </div>
         </form>

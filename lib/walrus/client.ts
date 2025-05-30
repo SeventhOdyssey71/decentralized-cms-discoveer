@@ -10,7 +10,12 @@ export interface WalrusBlob {
 
 export interface WalrusConfig {
   apiUrl: string;
-  suiClient: SuiClient;
+  apiKey?: string;
+}
+
+interface BlobResponse {
+  id: string;
+  content: Uint8Array;
 }
 
 export class WalrusClient {
@@ -22,63 +27,55 @@ export class WalrusClient {
 
   // Store a blob in Walrus
   async storeBlob(content: Uint8Array): Promise<string> {
-    try {
-      const response = await fetch(`${this.config.apiUrl}/store`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
-        body: content,
-      });
+    const response = await fetch(`${this.config.apiUrl}/blobs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+      },
+      body: content,
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to store blob: ${response.statusText}`);
-      }
-
-      const { blobId } = await response.json();
-      return blobId;
-    } catch (error) {
-      console.error('Error storing blob:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to store blob: ${response.statusText}`);
     }
+
+    const { id } = await response.json();
+    return id;
   }
 
   // Retrieve a blob from Walrus
-  async getBlob(blobId: string): Promise<WalrusBlob> {
-    try {
-      const response = await fetch(`${this.config.apiUrl}/retrieve/${blobId}`);
+  async getBlob(id: string): Promise<BlobResponse> {
+    const response = await fetch(`${this.config.apiUrl}/blobs/${id}`, {
+      headers: {
+        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to retrieve blob: ${response.statusText}`);
-      }
-
-      const content = await response.arrayBuffer();
-      return {
-        id: blobId,
-        content: new Uint8Array(content),
-        size: content.byteLength,
-        createdAt: new Date(),
-      };
-    } catch (error) {
-      console.error('Error retrieving blob:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to get blob: ${response.statusText}`);
     }
+
+    const content = await response.arrayBuffer();
+    return {
+      id,
+      content: new Uint8Array(content),
+    };
   }
 
   // Verify blob availability
-  async verifyBlob(blobId: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.config.apiUrl}/verify/${blobId}`);
+  async verifyBlob(id: string): Promise<boolean> {
+    const response = await fetch(`${this.config.apiUrl}/blobs/${id}/verify`, {
+      headers: {
+        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to verify blob: ${response.statusText}`);
-      }
-
-      const { available } = await response.json();
-      return available;
-    } catch (error) {
-      console.error('Error verifying blob:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to verify blob: ${response.statusText}`);
     }
+
+    const { verified } = await response.json();
+    return verified;
   }
 } 

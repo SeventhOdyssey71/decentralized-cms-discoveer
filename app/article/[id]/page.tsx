@@ -1,11 +1,31 @@
 "use client"
 
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Calendar, Star } from "lucide-react";
 import Header from '@/components/header';
+import { useWalrus } from '@/hooks/useWalrus';
+import { useContract } from '@/hooks/useContract';
+import { toast } from 'sonner';
+
+interface Article {
+  id: number;
+  title: string;
+  subtitle: string;
+  author: string;
+  publication: string;
+  readTime: string;
+  date: string;
+  claps: number;
+  responses: number;
+  image: string;
+  memberOnly: boolean;
+  content: string;
+  walrusBlobId?: string;
+}
 
 // This would typically come from an API or database
 const articles = [
@@ -35,95 +55,175 @@ const articles = [
 
 export default function ArticlePage() {
   const params = useParams();
+  const router = useRouter();
   const articleId = Number(params.id);
-  const article = articles.find(a => a.id === articleId);
+  const { getArticle } = useWalrus();
+  const { likeArticle, isLoading: isLiking } = useContract();
+  const [article, setArticle] = useState<Article | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!article) {
-    return <div>Article not found</div>;
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        // TODO: Fetch article metadata from blockchain
+        // For now, using mock data
+        const mockArticle: Article = {
+          id: 5,
+          title: "Understanding Move Programming Language",
+          subtitle: "A deep dive into the programming language that powers Sui blockchain.",
+          author: "Alex Chen",
+          publication: "Developer Weekly",
+          readTime: "12 min read",
+          date: "May 5, 2025",
+          claps: 156,
+          responses: 12,
+          image: "https://pbs.twimg.com/media/GsI13EmWwAAcsu4?format=jpg&name=large",
+          memberOnly: false,
+          content: "",
+          walrusBlobId: "mock-blob-id", // This would come from the blockchain
+        };
+
+        // Fetch content from Walrus
+        if (mockArticle.walrusBlobId) {
+          const content = await getArticle(mockArticle.walrusBlobId);
+          mockArticle.content = content;
+        }
+
+        setArticle(mockArticle);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching article:', error);
+        setError('Failed to load article content');
+        toast.error('Failed to load article content');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [articleId, getArticle]);
+
+  const handleLike = async () => {
+    if (!article) return;
+    
+    try {
+      await likeArticle(article.id);
+      setArticle(prev => prev ? { ...prev, claps: prev.claps + 1 } : null);
+      toast.success('Article liked successfully!');
+    } catch (error) {
+      console.error('Error liking article:', error);
+      toast.error('Failed to like article');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !article) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">
+              {error || 'Article not found'}
+            </h1>
+            <Link href="/dashboard">
+              <Button variant="outline">Back to Dashboard</Button>
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <Header />
-
-      {/* Walrus Staking Banner */}
-      {/* Moved to Header component */}
-
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <Card className="border-none">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold">{article.title}</CardTitle>
-            <p className="text-gray-600 text-lg">{article.subtitle}</p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="w-full h-64 rounded-lg overflow-hidden">
-                <img
-                  src={article.image || "/placeholder.svg"}
-                  alt={article.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="prose max-w-none">
-                {article.content}
-              </div>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{article.date}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{article.readTime}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4" />
-                  <span>{article.claps}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
+        <div className="mb-8">
           <Link href="/dashboard">
-            <Button variant="outline">
-              &larr; Back to Dashboard
+            <Button variant="outline" className="mb-6">
+              ← Back to Dashboard
             </Button>
           </Link>
-          {/* Placeholder for Read Next Article - functionality to be added */}
+          <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+          <p className="text-xl text-gray-600 mb-6">{article.subtitle}</p>
+          <div className="flex items-center gap-4 text-sm text-gray-500 mb-8">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span>{article.date}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>{article.readTime}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              <span>{article.claps} claps</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative w-full h-[400px] mb-8">
+          <img
+            src={article.image}
+            alt={article.title}
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
+
+        <div className="prose max-w-none mb-12">
+          <div dangerouslySetInnerHTML={{ __html: article.content }} />
+        </div>
+
+        <div className="border-t border-gray-200 pt-8">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+              <div>
+                <p className="font-medium">{article.author}</p>
+                <p className="text-sm text-gray-500">{article.publication}</p>
+              </div>
+            </div>
+            <Button 
+              onClick={handleLike}
+              disabled={isLiking}
+              className="flex items-center gap-2"
+            >
+              <Star className="w-4 h-4" />
+              {isLiking ? 'Liking...' : 'Like Article'}
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-12 flex justify-between">
+          <Link href="/dashboard">
+            <Button variant="outline">← Back to Dashboard</Button>
+          </Link>
           <Button variant="outline" disabled>
-            Read Next Article &rarr;
+            Read Next Article →
           </Button>
         </div>
       </main>
-
-      <footer className="border-t border-gray-200 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold">
-              Discoveer
-            </Link>
-            {/* Removed navigation links from header */}
-            {/* <div className="flex items-center gap-4">
-              <Link href="/" className="text-gray-600 hover:text-black">
-                Home
-              </Link>
-              <Link href="/pages" className="text-gray-600 hover:text-black">
-                Pages
-              </Link>
-              <Link href="/create" className="text-gray-600 hover:text-black">
-                Create
-              </Link>
-              <Link href="/about" className="text-gray-600 hover:text-black">
-                About
-              </Link>
-            </div> */}
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
