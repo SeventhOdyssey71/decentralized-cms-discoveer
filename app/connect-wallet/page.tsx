@@ -1,0 +1,95 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { useConnectWallet, useWallets } from '@mysten/dapp-kit';
+
+export default function ConnectWallet() {
+  const [isConnecting, setIsConnecting] = useState(false)
+  const router = useRouter()
+  const wallets = useWallets();
+  const { mutate: connect, isPending, isSuccess } = useConnectWallet();
+
+  // Redirect to dashboard on successful connection
+  useEffect(() => {
+    if (isSuccess) {
+      router.push("/dashboard");
+    }
+  }, [isSuccess, router]);
+
+  const handleWalletConnect = async () => {
+    // We will try to connect to the first available wallet for simplicity
+    if (wallets.length > 0) {
+      setIsConnecting(true);
+      // The connect mutation handles setting isPending and isSuccess
+      connect({ wallet: wallets[0] });
+    } else {
+      console.warn("No wallets found. Please install a Sui wallet extension.");
+      // Optionally, you could prompt the user to install a wallet here
+    }
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+      <div className="max-w-lg w-full text-center space-y-8">
+        {/* Animated Walrus Character */}
+        <div className="flex justify-center mb-8">
+          <div className="relative animate-bounce-walrus">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-r from-[#97F0E5] to-[#7DE0D3] p-1 shadow-2xl shadow-[#97F0E5]/50">
+              <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                <img
+                  src="/walrus-character-connect.png"
+                  alt="Walrus"
+                  className="w-28 h-28 object-contain rounded-full"
+                />
+              </div>
+            </div>
+            {/* Neon glow effect */}
+            <div className="absolute inset-0 rounded-full bg-[#97F0E5] opacity-40 blur-2xl animate-pulse-glow"></div>
+            <div className="absolute inset-0 rounded-full bg-[#97F0E5] opacity-20 blur-3xl"></div>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold">Connect Your Wallet</h1>
+          <p className="text-gray-600 text-lg">
+            Join the decentralized content revolution. Connect your wallet to start creating and sharing on the
+            blockchain.
+          </p>
+        </div>
+
+        {/* Connect Button */}
+        <Button
+          onClick={handleWalletConnect}
+          disabled={isPending}
+          className="w-full py-6 text-lg rounded-full bg-black text-white hover:bg-gray-800"
+        >
+          {isPending ? (
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              Connecting...
+            </div>
+          ) : (
+            "Connect Wallet"
+          )}
+        </Button>
+
+        {/* Additional Info */}
+        <div className="space-y-4 text-sm text-gray-500">
+          <p>
+            By connecting your wallet, you agree to our{" "}
+            <a href="/terms" className="underline hover:text-gray-700">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" className="underline hover:text-gray-700">
+              Privacy Policy
+            </a>
+          </p>
+        </div>
+      </div>
+    </main>
+  )
+}
