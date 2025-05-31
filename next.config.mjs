@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@mysten/walrus', '@mysten/walrus-wasm'],
+  },
 }
 
 export default nextConfig

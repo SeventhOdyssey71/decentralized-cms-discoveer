@@ -63,10 +63,7 @@ export default function ConnectWallet() {
         {/* Header */}
         <div className="space-y-4">
           <h1 className="text-4xl font-bold">Connect Your Wallet</h1>
-          <p className="text-gray-600 text-lg">
-            Join the decentralized content revolution. Connect your wallet to start creating and sharing on the
-            blockchain.
-          </p>
+     
         </div>
 
         {/* Connect Button */}
