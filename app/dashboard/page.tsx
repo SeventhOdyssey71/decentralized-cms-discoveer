@@ -66,22 +66,22 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <Header />
 
-        <div className="flex flex-1 max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-1 max-w-7xl mx-auto px-4 py-80">
           <div className="flex-1 flex justify-center items-center">
             {loading ? (
               <div className="flex flex-col items-center">
-                <Loader2 className="h-12 w-12 animate-spin text-gray-500" />
-                <p className="mt-2 text-gray-600">Loading articles from Sui blockchain...</p>
+                <Loader2 className="h-12 w-12 animate-spin text-gray-500 dark:text-gray-300" />
+                <p className="mt-2 text-gray-600 dark:text-gray-400">Loading articles from Sui blockchain...</p>
               </div>
             ) : articles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                 <p>Articles will be displayed here.</p>
               </div>
             ) : (
-              <p>No articles found on the Sui blockchain.</p>
+              <p className="text-gray-600 dark:text-gray-400">No articles found on the Sui blockchain.</p>
             )}
           </div>
         </div>

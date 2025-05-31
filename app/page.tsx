@@ -63,7 +63,7 @@ export default function Home() {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-center max-w-2xl mt-6 text-gray-700 text-lg leading-relaxed">
+        <p className="text-center max-w-2xl mt-6 text-gray-700 text-lg leading-relaxed dark:text-white">
           Decentralized content management powered by Sui blockchain and Walrus. Create and update content with no
           centralized components.
         </p>
@@ -81,13 +81,13 @@ export default function Home() {
       {/* Footer */}
       <footer className="w-full py-8 border-t border-gray-200 mt-auto">
         <div className="flex justify-center space-x-12 text-sm text-gray-600">
-          <Link href="https://github.com" className="hover:text-black">
+          <Link href="https://github.com" className="hover:text-black dark:text-white dark:hover:text-gray-300">
             Github
           </Link>
-          <Link href="/docs" className="hover:text-black">
+          <Link href="/docs" className="hover:text-black dark:text-white dark:hover:text-gray-300">
             Docs
           </Link>
-          <Link href="/socials" className="hover:text-black">
+          <Link href="/socials" className="hover:text-black dark:text-white dark:hover:text-gray-300">
             Socials
           </Link>
         </div>

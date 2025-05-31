@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { useWalrus } from "@/hooks/useWalrus"
 import { useRouter } from 'next/navigation'
 import {
   Bold,
@@ -39,7 +38,6 @@ export default function WritePage() {
     setMounted(true);
   }, []);
 
-  const { uploadArticle } = useWalrus()
   const router = useRouter()
 
   const handleContentChange = (value: string) => {
@@ -122,12 +120,11 @@ export default function WritePage() {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // For now, just set the featuredImage state to the file name
-      // In a real implementation, you would upload the file to Walrus
+      // Placeholder for image upload
       console.log("Selected file:", file.name);
-      // You might want to display a preview of the image here
-      // For now, we'll just use the URL input or a placeholder in the preview
-      // setFeaturedImage(URL.createObjectURL(file)); // Example: create a local URL for preview
+      alert("Image upload is a placeholder.");
+      // You would typically upload the file to a service like Walrus here
+      // For now, we just acknowledge the selection.
     }
   };
 
@@ -155,10 +152,10 @@ export default function WritePage() {
     }
 
     // Convert links ([text](url))
-    html = html.replace(/\[(.*?)\]\\((.*?)\\)/g, '<a href="$2">$1</a>');
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
 
     // Convert images (![alt](url))
-    html = html.replace(/!\[(.*?)\]\\((.*?)\\)/g, '<img src="$2" alt="$1" />');
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />');
 
     // Convert newlines to paragraphs (handle multiple newlines)
     html = html.split(/\n\n+/).map(paragraph => `<p>${paragraph}</p>`).join('\n');
@@ -167,23 +164,20 @@ export default function WritePage() {
   };
 
   const handlePublish = async () => {
-    if (!uploadArticle) {
-      console.error("Hooks not initialized yet.");
-      return;
-    }
     setIsPublishing(true);
-    try {
-      const htmlContent = convertMarkdownToHtml(content)
-      const walrusBlobId = await uploadArticle(htmlContent)
-      console.log("Article published successfully! (Metadata not published to contract)")
-      // Redirect to dashboard or article page
-      router.push('/dashboard')
-    } catch (error) {
-      console.error("Error publishing article:", error)
-      alert("Failed to publish article. See console for details.")
-    } finally {
-      setIsPublishing(false)
-    }
+    // Simulate publishing delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log("Simulating article publishing...")
+    // Placeholder success message or action
+    alert("Article published successfully! (Placeholder)");
+    setIsPublishing(false);
+    // Optionally redirect or clear form
+    setTitle("");
+    setContent("");
+    setFeaturedImage("");
+    setLastSaved("Never");
+    setWordCount(0);
+    // router.push('/dashboard') // You might want to redirect to a dashboard or similar
   }
 
   return (
@@ -222,72 +216,64 @@ export default function WritePage() {
         </div>
 
         {/* Main Editor */}
-        <div className="flex-1">
-          {!isPreview ? (
-            <div className="p-8">
-              {/* Toolbar */}
-              <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200">
-                <div className="flex-1"></div>
+        <div className="flex-1 p-8"> {/* Added p-8 for padding */}
+          {/* Toolbar */}
+          <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200">
+            <div className="flex-1"></div>
 
-                <span className="text-sm text-gray-500">{wordCount} words</span>
-                  {!isPreview && (
-                    <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
-                      <Eye className="h-4 w-4" />
-                      Preview
-                    </Button>
-                  )}
-                  {isPreview && (
-                    <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
-                      <Eye className="h-4 w-4" />
-                      Hide Preview
-                    </Button>
-                  )}
-                  <Button onClick={handlePublish} disabled={isPublishing} className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
-                    {isPublishing ? "Publishing..." : "Publish"}
-                  </Button>
-              </div>
+            <span className="text-sm text-gray-500">{wordCount} words</span>
+              {!isPreview && (
+                <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
+                  <Eye className="h-4 w-4" />
+                  Preview
+                </Button>
+              )}
+              {isPreview && (
+                <Button variant="outline" onClick={() => setIsPreview(!isPreview)} className="flex items-center gap-2 rounded-full">
+                  <Eye className="h-4 w-4" />
+                  Hide Preview
+                </Button>
+              )}
+              <Button onClick={handlePublish} disabled={isPublishing} className="bg-blue-600 text-white hover:bg-blue-700 rounded-full">
+                {isPublishing ? "Publishing..." : "Publish"}
+              </Button>
+          </div>
 
-                {/* Featured Image Input */}
-                <div className="mb-6 space-y-2">
-                  <Label htmlFor="featured-image">Featured Image</Label>
-                  <div className="flex items-center gap-4">
-                    <Input
-                      id="featured-image-url"
-                      placeholder="Enter image url (optional)"
-                      value={featuredImage}
-                      onChange={(e) => setFeaturedImage(e.target.value)}
-                      className="flex-1 text-base border-gray-300 rounded-lg placeholder:text-gray-400 focus-visible:ring-0"
-                    />
-                    <span className="text-gray-500">or</span>
-                    <Input
-                      id="featured-image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="w-auto text-sm"
-                    />
-                </div>
-              </div>
-
-              {/* Title Input */}
-              <Input
-                placeholder="Article title..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-300 focus-visible:ring-0"
-              />
-
-              {/* Content Editor */}
-              <Textarea
-                placeholder="Tell your story..."
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="min-h-[500px] text-lg leading-relaxed border-none p-0 resize-none placeholder:text-gray-300 focus-visible:ring-0"
-              />
+            {/* Featured Image Input */}
+            <div className="mb-6">
+              <Label htmlFor="featuredImage" className="block text-sm font-medium text-gray-700 mb-2">Featured Image</Label>
+              {/* Replaced Input with a simple file input for placeholder */}
+               <input
+                id="featuredImage"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+               />
+               {featuredImage && (
+                 <p className="mt-2 text-sm text-gray-500">Selected: {featuredImage}</p>
+               )}
             </div>
+
+          {/* Title Input */}
+          <Input
+            placeholder="Article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-300 focus-visible:ring-0"
+          />
+
+          {/* Content Editor */}
+          {!isPreview ? (
+            <Textarea
+              placeholder="Tell your story..."
+              value={content}
+              onChange={(e) => handleContentChange(e.target.value)}
+              className="min-h-[500px] text-lg leading-relaxed border-none p-0 resize-none placeholder:text-gray-300 focus-visible:ring-0"
+            />
           ) : (
             /* Preview Mode */
-            <div className="p-8 max-w-4xl mx-auto">
+            <div className="prose max-w-none dark:prose-invert">
               {featuredImage && (
                 <div className="mb-8">
                   <img
@@ -297,15 +283,16 @@ export default function WritePage() {
                   />
                 </div>
               )}
-
               <h1 className="text-4xl font-bold mb-6">{title || "Untitled Article"}</h1>
-
-                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }}></div>
-              </div>
-            )}
-              </div>
+              <div 
+                className="prose prose-lg max-w-none dark:prose-invert"
+                dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(content) }}
+              />
             </div>
           )}
+        </div>
+      </div>
+      )}
     </div>
   )
 }

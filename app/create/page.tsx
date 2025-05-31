@@ -7,16 +7,13 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MarkdownEditor } from "@/components/markdown-editor"
-import { useContract } from "@/hooks/useContract"
-import { useWalrus } from "@/hooks/useWalrus"
-import { toast } from "sonner"
-import ReactMarkdown from 'react-markdown';
+import { Textarea } from "@/components/ui/textarea"
+
 
 export default function CreatePage() {
   const router = useRouter()
-  const { createArticle } = useContract()
-  const { uploadArticle } = useWalrus()
+  // const { createArticle } = useContract()
+  // const { uploadArticle } = useWalrus()
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [isPublishing, setIsPublishing] = useState(false)
@@ -28,16 +25,16 @@ export default function CreatePage() {
 
     try {
       // First, store the article content in Walrus
-      const walrusBlobId = await uploadArticle(content)
+      // const walrusBlobId = await uploadArticle(content)
       
       // Then, create the article on-chain
-      await createArticle(walrusBlobId)
+      // await createArticle(walrusBlobId)
       
-      toast.success("Article published successfully!")
+      // toast.success("Article published successfully!")
       router.push("/dashboard")
     } catch (error) {
       console.error("Error publishing article:", error)
-      toast.error("Failed to publish article. Please try again.")
+      // toast.error("Failed to publish article. Please try again.")
     } finally {
       setIsPublishing(false)
     }
@@ -89,52 +86,60 @@ export default function CreatePage() {
 
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            {isPreview ? (
-              <div className="prose max-w-none">
-                <ReactMarkdown>{content}</ReactMarkdown>
-              </div>
-            ) : (
-            <MarkdownEditor value={content} onChange={setContent} />
-            )}
+            <div className="flex justify-end gap-4">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => setIsPreview(!isPreview)}
+                className="rounded-full"
+              >
+                {isPreview ? 'Edit' : 'Preview'}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => router.push("/dashboard")}
+                className="rounded-full"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="rounded-full bg-black text-white"
+                disabled={isPublishing}
+              >
+                {isPublishing ? "Publishing..." : "Publish Page"}
+              </Button>
+            </div>
           </div>
 
-          <div className="flex justify-end gap-4">
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={() => setIsPreview(!isPreview)}
-              className="rounded-full"
-            >
-              {isPreview ? 'Edit' : 'Preview'}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={() => router.push("/dashboard")}
-              className="rounded-full"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              className="rounded-full bg-black text-white"
-              disabled={isPublishing}
-            >
-              {isPublishing ? "Publishing..." : "Publish Page"}
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="content">Content</Label>
+            {isPreview ? (
+              <div className="prose max-w-none dark:text-white">
+                <p>{content}</p>
+              </div>
+            ) : (
+              <Textarea
+                placeholder="Article Content..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-[500px] text-lg leading-relaxed border rounded-md p-4 resize-none dark:bg-gray-800 dark:border-gray-700 dark:text-white placeholder:text-gray-400"
+              />
+            )}
           </div>
         </form>
       </div>
 
       <footer className="py-8 border-t border-gray-200">
         <div className="flex justify-center space-x-12">
-          <Link href="https://github.com" className="text-gray-600 hover:text-black">
+          <Link href="https://github.com" className="text-gray-600 hover:text-black dark:text-white dark:hover:text-gray-300">
             Github
           </Link>
-          <Link href="/docs" className="text-gray-600 hover:text-black">
+          <Link href="/docs" className="text-gray-600 hover:text-black dark:text-white dark:hover:text-gray-300">
             Docs
           </Link>
-          <Link href="/socials" className="text-gray-600 hover:text-black">
+          <Link href="/socials" className="text-gray-600 hover:text-black dark:text-white dark:hover:text-gray-300">
             Socials
           </Link>
         </div>

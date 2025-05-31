@@ -43,13 +43,13 @@ export default function Pages() {
 
       <footer className="py-8 border-t border-gray-200">
         <div className="flex justify-center space-x-12">
-          <Link href="https://github.com" className="text-gray-600 hover:text-black">
+          <Link href="https://github.com" className="text-gray-600 hover:text-black dark:text-white dark:hover:text-gray-300">
             Github
           </Link>
-          <Link href="/docs" className="text-gray-600 hover:text-black">
+          <Link href="/docs" className="text-gray-600 hover:text-black dark:text-white dark:hover:text-gray-300">
             Docs
           </Link>
-          <Link href="/socials" className="text-gray-600 hover:text-black">
+          <Link href="/socials" className="text-gray-600 hover:text-black dark:text-white dark:hover:text-gray-300">
             Socials
           </Link>
         </div>

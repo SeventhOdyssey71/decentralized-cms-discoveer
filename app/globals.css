@@ -20,6 +20,13 @@
   background-position: center center;
 }
 
+.dark .grid-background {
+  background-color: #1a1a1a; /* Dark background */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
 @font-face {
   font-family: "TWKEverett";
   src: url("/fonts/TWKEverett-Thin.otf") format("opentype");
@@ -65,6 +72,17 @@
   --foreground: 0 0% 10%;
   --muted: 0 0% 96.1%;
   --muted-foreground: 0 0% 45.1%;
+  --card: 0 0% 100%; /* card background */
+  --card-foreground: 0 0% 10%; /* card text */
+}
+
+html.dark {
+  --background: 240 10% 5%; /* Dark grey/black */
+  --foreground: 0 0% 95%; /* Light grey */
+  --muted: 240 5% 15%; /* Darker grey */
+  --muted-foreground: 240 5% 65%; /* Lighter grey */
+  --card: 240 10% 10%; /* Dark card background */
+  --card-foreground: 0 0% 95%; /* Dark card text */
 }
 
 @layer base {

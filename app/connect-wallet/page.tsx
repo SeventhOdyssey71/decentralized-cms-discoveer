@@ -82,23 +82,10 @@ export default function ConnectWallet() {
           )}
         </Button>
 
-        {/* Additional Info */}
-        <div className="space-y-4 text-sm text-gray-500">
-          <p>
-            By connecting your wallet, you agree to our{" "}
-            <a href="/terms" className="underline hover:text-gray-700">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" className="underline hover:text-gray-700">
-              Privacy Policy
-            </a>
-          </p>
-        </div>
 
         {/* Back to Landing Link */}
         <div className="mt-8">
-          <Link href="/" className="text-gray-600 hover:text-black underline">
+          <Link href="/" className="text-gray-600 hover:text-black underline dark:text-white dark:hover:text-gray-300">
             Return to Landing Page
           </Link>
         </div>
