@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Bold, Italic, List, ImageIcon, LinkIcon } from "lucide-react"
+import React from "react";
 
 interface MarkdownEditorProps {
   value: string
@@ -25,9 +26,9 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
     }, 0)
   }
 
-  const handleImageUpload = () => {
-    // In a real implementation, this would upload to Walrus
-    const imageUrl = prompt("Enter image URL or upload:")
+  const handleImageButtonClick = () => {
+    // Revert to prompting for image URL
+    const imageUrl = prompt("Enter image URL:")
     if (imageUrl) {
       insertMarkdown(`![Image](${imageUrl})`, "")
     }
@@ -55,7 +56,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
               <List className="h-4 w-4" />
               <span className="sr-only">List</span>
             </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={handleImageUpload}>
+            <Button type="button" variant="ghost" size="sm" onClick={handleImageButtonClick}>
               <ImageIcon className="h-4 w-4" />
               <span className="sr-only">Image</span>
             </Button>
@@ -93,8 +94,8 @@ function simpleMarkdownToHtml(markdown: string): string {
   return markdown
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/\[(.*?)\]$$(.*?)$$/g, '<a href="$2">$1</a>')
-    .replace(/!\[(.*?)\]$$(.*?)$$/g, '<img alt="$1" src="$2" />')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2" />')
     .replace(/^# (.*?)$/gm, "<h1>$1</h1>")
     .replace(/^## (.*?)$/gm, "<h2>$1</h2>")
     .replace(/^### (.*?)$/gm, "<h3>$1</h3>")

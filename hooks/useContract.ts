@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useWalletKit } from '@mysten/wallet-kit';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { CONTRACT_CONFIG } from '@/lib/contracts/config';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 
 export function useContract() {
-  const { currentAccount, signAndExecuteTransactionBlock } = useWalletKit();
+  const currentAccount = useCurrentAccount();
+  const { mutate: signAndExecuteTransactionBlock, isPending: isSigning } = useSignAndExecuteTransaction();
   const [isLoading, setIsLoading] = useState(false);
 
   const grantAuthorAccess = async () => {
@@ -22,7 +23,7 @@ export function useContract() {
     });
 
     return signAndExecuteTransactionBlock({
-      transactionBlock: tx,
+      transaction: tx.serialize(),
     });
   };
 
@@ -42,7 +43,7 @@ export function useContract() {
     });
 
     return signAndExecuteTransactionBlock({
-      transactionBlock: tx,
+      transaction: tx.serialize(),
     });
   };
 
@@ -66,7 +67,7 @@ export function useContract() {
       });
 
       await signAndExecuteTransactionBlock({
-        transactionBlock: tx,
+        transaction: tx.serialize(),
       });
     } catch (error) {
       console.error('Error liking article:', error);
@@ -101,7 +102,7 @@ export function useContract() {
       });
 
       await signAndExecuteTransactionBlock({
-        transactionBlock: tx,
+        transaction: tx.serialize(),
       });
     } catch (error) {
       console.error('Error publishing article:', error);

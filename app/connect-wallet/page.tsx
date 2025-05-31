@@ -35,7 +35,7 @@ export default function ConnectWallet() {
       connect({ wallet: wallets[0] });
     } else {
       console.warn("No wallets found. Please install a Sui wallet extension.");
-      // Optionally, you could prompt the user to install a wallet here
+      
     }
   }
 

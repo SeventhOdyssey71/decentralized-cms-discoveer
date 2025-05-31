@@ -20,5 +20,6 @@ export function useWalrus() {
   return {
     getArticle,
     uploadArticle,
+    uploadImage: client.uploadFile,
   };
 } 
